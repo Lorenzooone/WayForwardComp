@@ -20,14 +20,14 @@ namespace ConsoleApplication8
             int position = 0, de = 0x90B0, a, FF92 = 7, temp = 0, f = 0xD0, FF93 = 4, FF94 = 0, bc = 0xD09E, FF9A = 0, FF9B = 0x98, FF95 = 0, FF9C = 0, TempPos = 0;
             while (position < Decompressed.Length)
             {
-                    
+
             }
         }
         static void Decompress()
         {
             byte[] ROM = File.ReadAllBytes("ShantaePure.gbc");
-            List<byte> Final =new List<byte>();
-            int position = 0x3966B0, de = 0x90B0, a, FF92 = 7, temp = 0, f = 0xD0, FF93 = 4, bc = 0xD09E, FF9A=0, FF9B=0x98, FF9C=0, TempPos=0;
+            List<byte> Final = new List<byte>();
+            int position = 0x3964A3, de = 0x8000, a, FF92 = 0x7E, temp = 0, f = 0xD0, FF93 = 1, bc = 0xDFEE, FF9A = 0, FF9B = 0x98, Repetition = 0, TempPos = 0, starting = 0xEF, num = 0;
             while (position < 0x3969E6)
             {
                 do
@@ -36,62 +36,31 @@ namespace ConsoleApplication8
                     if (FF93 != 0)
                     {
                         a = (FF92);
-                        FF92 = a>>1;
+                        FF92 = a >> 1;
                         if ((a & 0x1) == 0)
                         {
-                            TempPos=ROM[position++];
-                            a = ROM[position];
-                            TempPos += (((a>>4)+0xD0)*0x100);
-                            position++;
-                            a = (a & 0xF)+3;
-                            f = 0;
-                            FF9C = a;
+                            TempPos = ROM[position++];
+                            a = ROM[position++];
+                            if (a < starting - 0xE0) //There has to be a better way
+                                num += 0x10;
+                            if (a > starting + 0xE0)
+                                num -= 0x10;
+                            starting = a;
+                            TempPos += (((a >> 4) + 0xD0 + num) * 0x100);
+                            Repetition = (a & 0xF) + 3;
                             do
                             {
-                                f += 0xA0;
-                                if (TempPos >= 0xD09E)
-                                    a = Final[TempPos - 0xD09E];
+                                if (TempPos >= 0xDFEF)
+                                    a = Final[TempPos - 0xDFEE];
                                 else
                                     a = 0;
                                 Final.Add((byte)a);
-                                a = 0xC0;
-                                a = a & 0x3;
-                                f = 0x40;
-                                if (a == 3)
-                                    f += 0x80;
-                                if (a < 3)
-                                    f += 0x10;
-                                if (((a >> 3) & 0x1) == 1)
-                                    f += 0x20;
-                                if (f >= 0x80)
-                                {
-
-                                }
                                 TempPos++;
                                 de++;
                                 bc++;
-                                a = TempPos >> 8;
-                                a = a & 0xF;
-                                a += 0xD0;
-                                TempPos = (TempPos & 0xFF) + (a * 0x100);
-                                a = bc >> 8;
-                                a = a & 0xF;
-                                a += 0xD0;
-                                bc = (bc & 0xFF) + (a * 0x100);
-                                a = FF9A;
-                                f = 0;
-                                if (a < (de & 0xFF))
-                                    f = 0x10;
-                                a = FF9C;
-                                f = f & 0x10;
-                                if ((a >> 3) == 1) { }
-                                else
-                                    f += 0x20;
-                                f += 0x40;
-                                if (a - 1 == 0)
-                                    f += 0x80;
-                                FF9C = a - 1;
-                            } while (f < 0x80);
+                                bc = (bc & 0xFF) + ((((bc >> 8) & 0xF) + 0xD0) * 0x100); //Reset bc
+                                Repetition -= 1;
+                            } while (Repetition != 0);
                             f = 0;
                             break;
                         }
@@ -100,23 +69,11 @@ namespace ConsoleApplication8
                         position += 1;
                         de += 1;
                         bc += 1;
-                        a = (bc >> 8);
-                        a = a & 0xF;
-                        a += 0xD0;
-                        bc = (bc & 0xFF) + (a * 0x100);
-                        a = FF9A;
-                        f = 0x40;
-                        if (a == (de & 0xFF))
-                            f += 0x80;
-                        if ((a >> 3) == 0)
-                            f += 0x20;
-                        if (a < (de & 0xFF))
-                            f += 0x10;
+                        bc = (bc & 0xFF) + ((((bc >> 8) & 0xF) + 0xD0) * 0x100); //Reset bc
                     }
                     else
                     {
-                        a = ROM[position];
-                        position += 1;
+                        a = ROM[position++];
                         FF93 = 8;
                         temp = a >> 1;
                         if (temp == 0)
@@ -128,92 +85,40 @@ namespace ConsoleApplication8
                         if ((f & 0x10) == 0)
                         {
                             TempPos = ROM[position++];
-                            a = ROM[position];
-                            TempPos += (((a >> 4) + 0xD0) * 0x100);
-                            position++;
-                            a = (a & 0xF) + 3;
-                            f = 0;
-                            FF9C = a;
+                            a = ROM[position++];
+                            if (a < starting - 0xE0) //There has to be a better way
+                                num += 0x10;
+                            if (a > starting + 0xE0)
+                                num -= 0x10;
+                            starting = a;
+                            TempPos += (((a >> 4) + 0xD0 + num) * 0x100);
+                            Repetition = (a & 0xF) + 3;
                             do
                             {
-                                f += 0xA0;
-                                if (TempPos >= 0xD09E)
-                                    a = Final[TempPos - 0xD09E];
+                                if (TempPos >= 0xDFEF)
+                                    a = Final[TempPos - 0xDFEE];
                                 else
                                     a = 0;
                                 Final.Add((byte)a);
-                                a = 0xC0;
-                                a = a & 0x3;
-                                f = 0x40;
-                                if (a == 3)
-                                    f += 0x80;
-                                if (a < 3)
-                                    f += 0x10;
-                                if (((a >> 3) & 0x1) == 1)
-                                    f += 0x20;
-                                if (f >= 0x80)
-                                {
-
-                                }
                                 TempPos++;
                                 de++;
                                 bc++;
-                                a = TempPos >> 8;
-                                a = a & 0xF;
-                                a += 0xD0;
-                                TempPos = (TempPos & 0xFF) + (a * 0x100);
-                                a = bc >> 8;
-                                a = a & 0xF;
-                                a += 0xD0;
-                                bc = (bc & 0xFF) + (a * 0x100);
-                                a = FF9A;
-                                f = 0;
-                                if (a < (de & 0xFF))
-                                    f = 0x10;
-                                a = FF9C;
-                                f = f & 0x10;
-                                if ((a >> 3) == 1) { }
-                                else
-                                    f += 0x20;
-                                f += 0x40;
-                                if (a - 1 == 0)
-                                    f += 0x80;
-                                FF9C = a - 1;
-                            } while (f < 0x80);
+                                bc = (bc & 0xFF) + ((((bc >> 8) & 0xF) + 0xD0) * 0x100); //Reset bc
+                                Repetition -= 1;
+                            } while (Repetition != 0);
                             f = 0;
                             break;
                         }
-                        a = ROM[position];
+                        a = ROM[position++];
                         Final.Add((byte)a);
-                        position += 1;
                         de += 1;
                         bc += 1;
-                        a = (bc >> 8);
-                        f = 0x20;
-                        a = a & 0xF;
-                        a += 0xD0;
-                        bc = (bc & 0xFF) + (a * 0x100);
-                        a = FF9A;
-                        f = 0x40;
-                        if (a == (de & 0xFF))
-                            f += 0x80;
-                        if ((a >> 3) == 0)
-                            f += 0x20;
-                        if (a < (de & 0xFF))
-                            f += 0x10;
+                        bc = (bc & 0xFF) + ((((bc >> 8) & 0xF) + 0xD0) * 0x100); //Reset bc
                     }
-                } while ((f < 0x80));
-                a = FF9B;
-                f = 0x40;
-                if (a == ((de >> 8) & 0xFF))
-                    f += 0x80;
-                if ((a >> 3) == 0)
-                    f += 0x20;
-                if (a < ((de >> 8) & 0xFF))
-                    f += 0x10;
-                if (f >= 0x80)
+                } while (FF9A != (de & 0xFF));
+                if (FF9B == ((de >> 8) & 0xFF))
                 {
-
+                    break;
                 }
             }
             File.WriteAllBytes("TestFont.bin", Final.ToArray());
