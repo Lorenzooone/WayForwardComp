@@ -18,6 +18,7 @@ namespace ConsoleApplication8
         {
             int TempPos = position;
             List<byte> Result = new List<byte>();
+            Result.Add(0);
 
             return Result.ToArray();
         }
@@ -25,7 +26,7 @@ namespace ConsoleApplication8
         {
             byte[] Decompressed = File.ReadAllBytes("TestFont.bin");
             List<byte> Compressed = new List<byte>();
-            int position = 0, de = 0x8000, a, FF92 = 0x7E, FF9A = 0, FF9B = 0x98, Repetition = 0, TempPos = 0, starting = 0xEF, num = 0;
+            int position = 0, de = 0x8000, a, FF92 = 0x7E, FF93 = 1, FF9A = 0, FF9B = 0x98, Repetition = 0, TempPos = 0, bc = 0xFEE;
             while (position < Decompressed.Length)
             {
                 Compressed.AddRange(search(Decompressed, ref position));
@@ -35,7 +36,8 @@ namespace ConsoleApplication8
         {
             byte[] ROM = File.ReadAllBytes("ShantaePure.gbc");
             List<byte> Final = new List<byte>();
-            int position = 0x3964A3, de = 0x8000, a, FF92 = 0x7E, FF93 = 1, FF9A = 0, FF9B = 0x98, Repetition = 0, TempPos = 0, starting = 0xEF, num = 0;
+            byte[] Temp = new byte[0x1000];
+            int position = 0x3964A3, de = 0x8000, a, FF92 = 0x7E, FF93 = 1, FF9A = 0, FF9B = 0x98, Repetition = 0, TempPos = 0, bc=0xFEE;
             while (FF9B != ((de >> 8) & 0xFF))
             {
                 do
@@ -52,26 +54,26 @@ namespace ConsoleApplication8
                     {
                         TempPos = ROM[position++];
                         a = ROM[position++];
-                        if (a < starting - 0x80) //There has to be a better way
-                            num += 0x10;
-                        if (a > starting + 0x80)
-                            num -= 0x10;
-                        starting = a;
-                        TempPos += (((a >> 4) + 0xD0 + num) * 0x100);
+                        TempPos += ((a >> 4) * 0x100);
                         Repetition = (a & 0xF) + 3;
                         do
                         {
-                            a = Final[TempPos - 0xDFEE];
-                            Final.Add((byte)a);
+                            Temp[bc] = Temp[TempPos];
+                            Final.Add(Temp[bc]);
                             TempPos++;
                             de++;
+                            bc++;
+                            TempPos = (TempPos & 0xFF) + (((TempPos >> 8) & 0xF) * 0x100); //Reset TempPos
+                            bc = (bc & 0xFF) + (((bc >> 8) & 0xF) * 0x100); //Reset bc
                         } while (--Repetition != 0);
                     }
                     else
                     {
-                        a = ROM[position++];
-                        Final.Add((byte)a);
+                        Temp[bc] = ROM[position++];
+                        Final.Add(Temp[bc]);
+                        bc++;
                         de++;
+                        bc = (bc & 0xFF) + (((bc >> 8) & 0xF) * 0x100); //Reset bc
                     }
                 } while (FF9A != (de & 0xFF));
             }
