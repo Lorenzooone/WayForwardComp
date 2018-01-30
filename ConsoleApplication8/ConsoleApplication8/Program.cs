@@ -19,58 +19,56 @@ namespace ConsoleApplication8
         {
             int i = 0; //0x41E9 VRAM Loading 0x540 and 0x1366 OAM loading? Should work next on those to get the last files
             List<Comp> Data = new List<Comp>();
-            Comp Temp = new Comp();
-            Temp.Location = 0x3964A3; //0x10DFE Pointer
-            Temp.Size = 0x1800;
-            Temp.path = "Font.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x386786; //0x7256D and 0x72858 Pointer
-            Temp.Size = 0x1800;
-            Temp.path = "Capcom.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x387041; //0x72578 and 0x72863 Pointer
-            Temp.Size = 0x1800;
-            Temp.path = "Disclaimer.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x3417D6; //0x70006 -0x11 Bytes long?
-            Temp.Size = 0x1800;
-            Temp.path = "License.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x31B2EB; //0x16D3E Pointer - 0xB Bytes long?
-            Temp.Size = 0x1800;
-            Temp.path = "FileOne.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x31C000; //0x16D48 Pointer
-            Temp.Size = 0x1800;
-            Temp.path = "FileTwo.bin";
-            Data.Add(Temp);
-            Temp = new Comp();
-            Temp.Location = 0x1ECCBD;
-            Temp.Size = 0x1800;
-            Temp.path = "Dance.bin"; //0x16555 and 0x16679 Pointer
-            Data.Add(Temp);
+            string[] list=File.ReadAllLines("List.txt");
+            int Entries = StringToInt(list[0]);
+            string FileName = list[1];
+            for(int k=0; k<Entries; k++)
+            {
+                Comp Temp = new Comp();
+                Temp.path = list[3 + (k * 4)];
+                Temp.Location = StringToInt(list[4 + (k * 4)]);
+                Temp.Size = StringToInt(list[5 + (k * 4)]);
+                Data.Add(Temp);
+            }
             while ((i != 49) && (i != 53)) //1 or 5
             {
-                Console.WriteLine("Tool from Lorenzooone - Lorenzo Carletti, 2017\nThe ROM must be named ShantaePure.gbc and it must be in the same folder\nLook at the source code on Github to see what are the files names\nPress 1 to Compress, 5 to Decompress");
+                Console.WriteLine("Tool from Lorenzooone - Lorenzo Carletti, 2017\nThe ROM must be named the same as the first line in list.txt and it must be in the same folder\nLook at the source code on Github to see what are the files names\nPress 1 to Compress, 5 to Decompress");
                 i=Console.Read();
             }
             if (i == 49)
                 i = 1;
             else
                 i = 5;
-            byte[] ROM = File.ReadAllBytes("ShantaePure.gbc");
+            byte[] ROM = File.ReadAllBytes(FileName);
             if(i==5)
-                for(i=0; i<Data.Count; i++)
+                for(i=0; i<Entries; i++)
                     Decompress(ROM, Data[i]);
             else
-                for(i=0; i<Data.Count; i++)
-                    Compress(ROM, Data[i]);
+                for(i=0; i<Entries; i++)
+                    Compress(ROM, Data[i], FileName);
             return i;
+        }
+        static int CharToInt(char a)
+        {
+            switch(a)
+            {
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'E':
+                case 'F':
+                    return a-'A'+0xA;
+                default:
+                    return a - '0';
+            }
+        }
+        static int StringToInt(string a)
+        {
+            int k = 0;
+            for (int i = 0; i < a.Length; i++)
+                k += (CharToInt(a[a.Length-1-i]) << (4 * i));
+            return k;
         }
         static byte InvertByte(byte Result)
         {
@@ -124,7 +122,7 @@ namespace ConsoleApplication8
             Result[0] = InvertByte(Result[0]);
             return Result.ToArray();
         }
-        static void Compress(byte[] ROM, Comp Data)
+        static void Compress(byte[] ROM, Comp Data, string FileName)
         {
             byte[] SubROM = ROM;
             byte[] Decompressed = File.ReadAllBytes(Data.path);
@@ -135,7 +133,7 @@ namespace ConsoleApplication8
             File.WriteAllBytes(Data.path.Remove(Data.path.Count()-4)+"_C.bin", Compressed.ToArray());
             for (int i = 0; i < Compressed.Count; i++)
                 SubROM[i + Data.Location] = Compressed[i];
-            File.WriteAllBytes("ShantaeComp.gbc", SubROM);
+            File.WriteAllBytes(FileName, SubROM);
         }
         static void Decompress(byte[] ROM, Comp Data)
         {
