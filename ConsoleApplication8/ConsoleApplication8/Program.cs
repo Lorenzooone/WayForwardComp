@@ -206,8 +206,8 @@ namespace ConsoleApplication8
                 WriteLEndian(ROM, Data.Pointer + 2, 2, WritingPos / 0x4000);
                 if(Data.Pointer2!=0)
                 {
-                    WriteLEndian(ROM, Data.Pointer, 2, (WritingPos % 0x4000) + 0x4000);
-                    WriteLEndian(ROM, Data.Pointer + 2, 2, WritingPos / 0x4000);
+                    WriteLEndian(ROM, Data.Pointer2, 2, (WritingPos % 0x4000) + 0x4000);
+                    WriteLEndian(ROM, Data.Pointer2 + 2, 2, WritingPos / 0x4000);
                 }
             }
             for (int i = 0; i < Compressed.Count; i++)
