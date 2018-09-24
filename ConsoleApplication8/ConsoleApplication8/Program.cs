@@ -164,6 +164,7 @@ namespace ConsoleApplication8
         }
         static int searchFree(byte[] ROM, int size)
         {
+            const int MinimumDistance = 0x40; //Let's not break other stuff
             int Pos = 0x4000;
             int i = 0;
             while (i < size && Pos < 0x400000)
@@ -176,7 +177,14 @@ namespace ConsoleApplication8
                         i = 0;
                 }
                 if (i == size)
-                    return Pos-size;
+                {
+                    int k = 1;
+                    while (k < MinimumDistance && ROM[Pos + k] == 0)
+                        k++;
+                    if(k == MinimumDistance)
+                        return Pos - size + MinimumDistance;
+                    Pos += k;
+                }
                 Pos++;
             }
             return -1;
