@@ -61,7 +61,7 @@ namespace ConsoleApplication8
                 }
                 File.WriteAllBytes(OutFileName, ROM);
             }
-            return i;
+            return 0;
         }
         static int CharToInt(char a)
         {
@@ -167,23 +167,18 @@ namespace ConsoleApplication8
             const int MinimumDistance = 0x40; //Let's not break other stuff
             int Pos = 0x4000;
             int i = 0;
-            while (i < size && Pos < 0x400000)
+            while (i < (size + MinimumDistance) && Pos < 0x400000)
             {
-                for (i = 0; i < size && Pos % 0x4000 != 0x3FFF; Pos++)
+                for (i = 0; i < (size + MinimumDistance) && ((Pos % 0x4000) != 0x3FFF); Pos++)
                 {
-                    if (ROM[Pos] == 0)
+                    if (ROM[Pos] == 0xFF)
                         i++;
                     else
                         i = 0;
                 }
-                if (i == size)
+                if (i == size + MinimumDistance)
                 {
-                    int k = 1;
-                    while (k < MinimumDistance && ROM[Pos + k] == 0)
-                        k++;
-                    if(k == MinimumDistance)
-                        return Pos - size + MinimumDistance;
-                    Pos += k;
+                    return Pos - size;
                 }
                 Pos++;
             }
@@ -202,6 +197,7 @@ namespace ConsoleApplication8
                 WritingPos = Data.Location;
             else
             {
+                Console.WriteLine("WARNING: " + Data.path + "'s size is bigger than its original size. Had to move it in the ROM.");
                 WritingPos = searchFree(ROM, Compressed.Count);
                 if (WritingPos == -1)
                 {
