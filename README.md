@@ -12,6 +12,10 @@ In the future I might make some changes, though.
 
 Block at 0x0A1B to see arrangements/stuff
 
+0x2A4A40 Weird assorted arrangements
+
+0x172A50 GAME OVER - Arrangement... Of sorts...
+
 0x3631C4 Erase this file - Arrangement
 
 0x36327E Really? - Arrangement
