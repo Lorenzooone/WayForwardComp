@@ -8,7 +8,7 @@ In the end I RE the compression and now the release can compress/decompress the 
 In the future I might make some changes, though.
 (Making it work for other graphics too could be an idea)
 
---Notes about non-decompressable graphics
+## Notes about non-decompressable graphics
 
 Block at 0A1B to see arrangements/stuff
 
