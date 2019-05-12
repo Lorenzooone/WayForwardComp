@@ -10,22 +10,22 @@ In the future I might make some changes, though.
 
 ## Notes about non-decompressable graphics
 
-Block at 0A1B to see arrangements/stuff
+Block at 0x0A1B to see arrangements/stuff
 
-3631C4 Erase this file - Arrangement
+0x3631C4 Erase this file - Arrangement
 
-36327E Really? - Arrangement
+0x36327E Really? - Arrangement
 
-383F88 Continue - Arrangement
+0x383F88 Continue - Arrangement
 
-23BFB6 GEMS - Arrangement
+0x23BFB6 GEMS - Arrangement
 
-297F90 OUT - frame 1 GFX
+0x297F90 OUT - frame 1 GFX
 
-29FF80 OUT - frame 2 GFX
+0x29FF80 OUT - frame 2 GFX
 
-2A25D0 OUT - frame 3 GFX
+0x2A25D0 OUT - frame 3 GFX
 
-2A2620 OUT - frame 4 GFX
+0x2A2620 OUT - frame 4 GFX
 
-377476 Press Start - GFX
+0x377476 Press Start - GFX
